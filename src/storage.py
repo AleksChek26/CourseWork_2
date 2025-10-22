@@ -3,7 +3,7 @@ import json
 import pandas as pd
 from abc import ABC, abstractmethod
 from typing import Dict, List
-from .data_models import Vacancy
+from src.data_models import Vacancy
 
 class AbstractDataSaver(ABC):
     """Абстрактный класс для хранения вакансий"""
@@ -22,15 +22,18 @@ class AbstractDataSaver(ABC):
 
 class JSONSaver(AbstractDataSaver):
     """Реализует хранение вакансий в JSON-файлах"""
-    def __init__(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.filename = os.path.join(current_dir, '..', 'data', 'vacancies.json')
+    DATA_DIR = "data"  # Папка для хранения данных
+
+    def __init__(self, filename="vacancies.json"):
+        # Проверяем существование папки и создаем её, если её нет
+        os.makedirs(JSONSaver.DATA_DIR, exist_ok=True)
+        self.file_path = os.path.join(JSONSaver.DATA_DIR, filename)
 
     def add_vacancy(self, vacancy: Vacancy):
         existing_data = self._load_json()
         new_entry = {
             "title": vacancy.title,
-            "city": vacancy.city,              # Новое поле
+            "city": vacancy.city,
             "link": vacancy.link,
             "salary": vacancy.salary,
             "description": vacancy.description
@@ -40,13 +43,13 @@ class JSONSaver(AbstractDataSaver):
 
     def _load_json(self) -> List[Dict]:
         try:
-            with open(self.filename, 'r', encoding='utf-8') as file:
+            with open(self.file_path, 'r', encoding='utf-8') as file:
                 return json.load(file)
         except FileNotFoundError:
             return []
 
     def _save_json(self, data: List[Dict]):
-        with open(self.filename, 'w', encoding='utf-8') as file:
+        with open(self.file_path, 'w', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
 
     def delete_vacancy(self, vacancy: Vacancy):
@@ -66,7 +69,8 @@ class JSONSaver(AbstractDataSaver):
                 for key, value in criteria.items():
                     if isinstance(value, tuple):  # Критерии диапазона (зарплаты)
                         low, high = value
-                        if not (low <= entry.get(key, 0) <= high):
+                        current_salary = entry.get(key)
+                        if current_salary is None or not (low <= current_salary <= high):
                             matches_criteria = False
                             break
                     elif entry.get(key) != value:
@@ -80,15 +84,18 @@ class JSONSaver(AbstractDataSaver):
 
 class CSVSaver(AbstractDataSaver):
     """Реализует хранение вакансий в CSV-файлах"""
-    def __init__(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.filename = os.path.join(current_dir, '..', 'data', 'vacancies.csv')
+    DATA_DIR = "data"  # Папка для хранения данных
+
+    def __init__(self, filename="vacancies.csv"):
+        # Проверяем существование папки и создаем её, если её нет
+        os.makedirs(CSVSaver.DATA_DIR, exist_ok=True)
+        self.file_path = os.path.join(CSVSaver.DATA_DIR, filename)
 
     def add_vacancy(self, vacancy: Vacancy):
         df = self._load_csv()
         new_row = pd.DataFrame({
             "title": [vacancy.title],
-            "city": [vacancy.city],              # Новое поле
+            "city": [vacancy.city],
             "link": [vacancy.link],
             "salary": [vacancy.salary],
             "description": [vacancy.description]
@@ -98,12 +105,12 @@ class CSVSaver(AbstractDataSaver):
 
     def _load_csv(self) -> pd.DataFrame:
         try:
-            return pd.read_csv(self.filename)
+            return pd.read_csv(self.file_path)
         except FileNotFoundError:
             return pd.DataFrame(columns=["title", "city", "link", "salary", "description"])
 
     def _save_csv(self, df: pd.DataFrame):
-        df.to_csv(self.filename, index=False)
+        df.to_csv(self.file_path, index=False)
 
     def delete_vacancy(self, vacancy: Vacancy):
         df = self._load_csv()
@@ -119,15 +126,18 @@ class CSVSaver(AbstractDataSaver):
 
 class XLSSaver(AbstractDataSaver):
     """Реализует хранение вакансий в XLSX-файлах"""
-    def __init__(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.filename = os.path.join(current_dir, '..', 'data', 'vacancies.xlsx')
+    DATA_DIR = "data"  # Папка для хранения данных
+
+    def __init__(self, filename="vacancies.xlsx"):
+        # Проверяем существование папки и создаем её, если её нет
+        os.makedirs(XLSSaver.DATA_DIR, exist_ok=True)
+        self.file_path = os.path.join(XLSSaver.DATA_DIR, filename)
 
     def add_vacancy(self, vacancy: Vacancy):
         df = self._load_xlsx()
         new_row = pd.DataFrame({
             "title": [vacancy.title],
-            "city": [vacancy.city],              # Новое поле
+            "city": [vacancy.city],
             "link": [vacancy.link],
             "salary": [vacancy.salary],
             "description": [vacancy.description]
@@ -137,12 +147,12 @@ class XLSSaver(AbstractDataSaver):
 
     def _load_xlsx(self) -> pd.DataFrame:
         try:
-            return pd.read_excel(self.filename)
+            return pd.read_excel(self.file_path)
         except FileNotFoundError:
             return pd.DataFrame(columns=["title", "city", "link", "salary", "description"])
 
     def _save_xlsx(self, df: pd.DataFrame):
-        df.to_excel(self.filename, index=False)
+        df.to_excel(self.file_path, index=False)
 
     def delete_vacancy(self, vacancy: Vacancy):
         df = self._load_xlsx()

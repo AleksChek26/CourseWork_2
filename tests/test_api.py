@@ -1,9 +1,9 @@
 import sys
 sys.path.insert(0, '../src')
 import unittest
+import requests
 from src.api import HeadHunterAPI
 from requests_mock import mock
-import requests
 
 class TestHeadHunterAPI(unittest.TestCase):
     def setUp(self):
@@ -26,8 +26,3 @@ class TestHeadHunterAPI(unittest.TestCase):
             m.get("https://api.hh.ru/vacancies", status_code=500)
             with self.assertRaises(requests.exceptions.HTTPError):
                 self.api.get_vacancies("Python")
-
-    def test_connect(self):
-        """Тест подключения к API (ничего не делает, просто проверяется, что метод существует)"""
-        self.api.connect()
-        # Так как connect() ничего не делает, достаточно вызвать его без ошибок

@@ -12,7 +12,7 @@ class UserInteraction:
         vacancies = hh_api.get_vacancies(profession)
         vacancies_objs = Vacancy.cast_to_object_list(vacancies)
 
-        saver = JSONSaver() #CSVSaver(), XLSSaver()
+        saver = JSONSaver()  # или CSVSaver(), или XLSSaver()
         for vacancy in vacancies_objs:
             saver.add_vacancy(vacancy)
 

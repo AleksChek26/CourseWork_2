@@ -5,18 +5,18 @@ from src.data_models import Vacancy
 
 class TestVacancy(unittest.TestCase):
     def setUp(self):
-        # Добавляем город в конструкторе
+        # Передаем все аргументы, включая город
         self.valid_vacancy = Vacancy("Software Engineer", "Санкт-Петербург", "https://example.com/se", 100000, "Требуются знания Python и Django")
         self.invalid_vacancy = Vacancy("Invalid Job", "Москва", "invalid-link", -10000, "Description here")
 
     def test_valid_vacancy(self):
         """Проверка корректной вакансии"""
-        self.valid_vacancy.validate()
+        self.valid_vacancy._validate()  # Используем приватный метод
 
     def test_invalid_vacancy(self):
         """Проверка некорректной вакансии"""
         with self.assertRaises(ValueError):
-            self.invalid_vacancy.validate()
+            self.invalid_vacancy._validate()  # Используем приватный метод
 
     def test_cast_to_object_list(self):
         """Преобразование JSON-списка в список объектов Vacancy"""
@@ -30,6 +30,3 @@ class TestVacancy(unittest.TestCase):
         self.assertIsInstance(vacancies[0], Vacancy)
         self.assertEqual(vacancies[0].title, "Python Developer")
         self.assertEqual(vacancies[0].city, "Москва")  # Проверяем наличие города
-
-if __name__ == '__main__':
-    unittest.main()

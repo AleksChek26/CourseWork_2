@@ -10,12 +10,28 @@ class Vacancy:
     salary: Optional[int]    # Зарплата (может отсутствовать)
     description: str         # Краткое описание или требования
 
-    def validate(self):
+    def _validate(self):
         """
-        Валидирует правильность объекта вакансии.
+        Приватный метод для валидации объекта вакансии.
         """
         if self.salary is not None and self.salary <= 0:
             raise ValueError(f"Некорректная зарплата {self.salary}")
+
+    def __lt__(self, other):
+        """Метод для сравнения двух вакансий по зарплате (<)"""
+        if self.salary is None:
+            return False
+        if other.salary is None:
+            return True
+        return self.salary < other.salary
+
+    def __gt__(self, other):
+        """Метод для сравнения двух вакансий по зарплате (>)"""
+        if self.salary is None:
+            return False
+        if other.salary is None:
+            return True
+        return self.salary > other.salary
 
     @staticmethod
     def cast_to_object_list(data: List[dict]) -> List['Vacancy']:
@@ -43,7 +59,7 @@ class Vacancy:
                     salary=salary,           # максимальная зарплата
                     description=item['snippet'].get('requirement', '')  # описание вакансии
                 )
-                vacancy.validate()
+                vacancy._validate()
                 vacancies.append(vacancy)
             except Exception as e:
                 print(f"Пропущена некорректная запись: {e}")
